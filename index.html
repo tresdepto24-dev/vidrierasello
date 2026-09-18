@@ -106,74 +106,64 @@
 
     <main id="vidriera-container" class="vidriera-grid">
         <div style="grid-column: 1 / -1; text-align: center; color: #00ffff; padding: 40px;">
-            Buscando piezas en la carpeta de GitHub...
+            Cargando piezas de la vidriera...
         </div>
     </main>
 
     <canvas id="canvas-sello" style="display:none;"></canvas>
 
     <script>
+        // ACÁ AGREGÁS LOS NOMBRES DE TUS IMÁGENES CADA VEZ QUE SUBAS UNA NUEVA
+        const listaImagenes = [
+            "armonia.png",
+            "besosestampiya.png",
+            "besos.png",
+            "bici.png",
+            "bosquecosmico.png",
+            "faro.png",
+            "gatospecial.png",
+            "libro.png"
+        ];
+
         function formatearTitulo(nombreArchivo) {
             let sinExtension = nombreArchivo.substring(0, nombreArchivo.lastIndexOf('.')) || nombreArchivo;
             let limpio = sinExtension.replace(/[-_]/g, ' ');
             return limpio.charAt(0).toUpperCase() + limpio.slice(1);
         }
 
-        async function cargarVidrieraAutomatica() {
+        function cargarVidrieraDirecta() {
             const contenedor = document.getElementById('vidriera-container');
-            
-            try {
-                let apiUrl = `https://api.github.com/repos/tresdepto24-dev/vidrierasello/contents/?t=${new Date().getTime()}`;
+            contenedor.innerHTML = "";
 
-                const respuesta = await fetch(apiUrl);
-                if (!respuesta.ok) throw new Error("No se pudo conectar con el repositorio.");
-                
-                const archivos = await respuesta.json();
-                
-                const imagenes = archivos.filter(item => {
-                    if (item.type !== 'file') return false;
-                    const ext = item.name.split('.').pop().toLowerCase();
-                    return ['png', 'jpg', 'jpeg', 'webp'].includes(ext);
-                });
-
-                if (imagenes.length === 0) {
-                    contenedor.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: #ff5555; padding: 40px;">⚠️ No se encontraron imágenes en el repositorio.</div>';
-                    return;
-                }
-
-                contenedor.innerHTML = "";
-
-                imagenes.forEach((imgData) => {
-                    const tituloLindo = formatearTitulo(imgData.name);
-                    const hashAleatorio = "MDW-" + Math.random().toString(36).substring(2, 8).toUpperCase() + "-2026";
-                    
-                    const tarjeta = document.createElement('div');
-                    tarjeta.className = 'tarjeta-estampiya';
-                    
-                    const urlImagenFresca = `${imgData.name}?v=${Math.random()}`;
-
-                    tarjeta.innerHTML = `
-                        <div>
-                            <div class="estampiya-frame">
-                                <img src="${urlImagenFresca}" alt="${tituloLindo}" crossorigin="anonymous" class="img-estampa-ref">
-                            </div>
-                            <div class="info-estampa">
-                                <h3>${tituloLindo}</h3>
-                                <div><strong>Posta:</strong> 1001 (MDW)</div>
-                                <div><strong>Hash Base:</strong> ${hashAleatorio}</div>
-                            </div>
-                        </div>
-                        <button class="btn-descarga-mdw" onclick="descargarEstampiyaDeVidriera(this)">
-                            📥 VER Y DESCARGAR CON MS
-                        </button>
-                    `;
-                    contenedor.appendChild(tarjeta);
-                });
-
-            } catch (error) {
-                console.error(error);
-                contenedor.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: #ff5555; padding: 40px;">⚠️ Error al cargar las imágenes automáticamente. Verificá la conexión.</div>';
+            if (listaImagenes.length === 0) {
+                contenedor.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: #ff5555; padding: 40px;">⚠️ No hay imágenes configuradas.</div>';
+                return;
             }
+
+            listaImagenes.forEach((nombreArchivo) => {
+                const tituloLindo = formatearTitulo(nombreArchivo);
+                const hashAleatorio = "MDW-" + Math.random().toString(36).substring(2, 8).toUpperCase() + "-2026";
+                
+                const tarjeta = document.createElement('div');
+                tarjeta.className = 'tarjeta-estampiya';
+                
+                tarjeta.innerHTML = `
+                    <div>
+                        <div class="estampiya-frame">
+                            <img src="${nombreArchivo}" alt="${tituloLindo}" crossorigin="anonymous" class="img-estampa-ref">
+                        </div>
+                        <div class="info-estampa">
+                            <h3>${tituloLindo}</h3>
+                            <div><strong>Posta:</strong> 1001 (MDW)</div>
+                            <div><strong>Hash Base:</strong> ${hashAleatorio}</div>
+                        </div>
+                    </div>
+                    <button class="btn-descarga-mdw" onclick="descargarEstampiyaDeVidriera(this)">
+                        📥 VER Y DESCARGAR CON MS
+                    </button>
+                `;
+                contenedor.appendChild(tarjeta);
+            });
         }
 
         function descargarEstampiyaDeVidriera(btn) {
@@ -198,7 +188,6 @@
             const mStr = String(ahora.getMinutes()).padStart(2, '0');
             const sStr = String(ahora.getSeconds()).padStart(2, '0');
             const msStr = String(ahora.getMilliseconds()).padStart(3, '0');
-            const timestampCompleto = `${fStr}  ${hStr}:${mStr}:${sStr}.${msStr}`;
             const hashSello = "HASH-ID: MDW-" + Math.random().toString(36).substring(2, 10).toUpperCase() + "-1001";
 
             const escala = canvas.width / 1200;
@@ -292,7 +281,7 @@
             enlace.click();
         }
 
-        window.onload = cargarVidrieraAutomatica;
+        window.onload = cargarVidrieraDirecta;
     </script>
 
 </body>
