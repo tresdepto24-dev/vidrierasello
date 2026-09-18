@@ -123,27 +123,7 @@
             const contenedor = document.getElementById('vidriera-container');
             
             try {
-                let apiUrl = "";
-                const hostParts = window.location.hostname.split('.');
-                
-                // Detectar si estamos en GitHub Pages (usuario.github.io/repositorio)
-                if (window.location.hostname.includes('github.io')) {
-                    const userOrOrg = hostParts[0];
-                    const pathArray = window.location.pathname.split('/').filter(Boolean);
-                    const repoName = pathArray.length > 0 ? pathArray[0] : '';
-                    
-                    if (repoName) {
-                        apiUrl = `https://api.github.com/repos/${userOrOrg}/${repoName}/contents/`;
-                    } else {
-                        // Caso de repositorio principal (usuario.github.io sin subdirectorio)
-                        apiUrl = `https://api.github.com/repos/${userOrOrg}/${userOrOrg}.github.io/contents/`;
-                    }
-                } else {
-                    // Modo local o pruebas (podes cambiar esto si testeas localmente con otro repo de backup)
-                    apiUrl = `https://api.github.com/repos/tresdepto24-dev/vidrierasello/contents/`;
-                }
-
-                apiUrl += `?t=${new Date().getTime()}`;
+                let apiUrl = `https://api.github.com/repos/tresdepto24-dev/vidrierasello/contents/?t=${new Date().getTime()}`;
 
                 const respuesta = await fetch(apiUrl);
                 if (!respuesta.ok) throw new Error("No se pudo conectar con el repositorio.");
