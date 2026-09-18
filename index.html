@@ -113,10 +113,6 @@
     <canvas id="canvas-sello" style="display:none;"></canvas>
 
     <script>
-        const pathArray = window.location.pathname.split('/');
-        const userOrOrg = window.location.hostname.split('.')[0]; 
-        const repoName = window.location.hostname.includes('github.io') ? pathArray[1] : '';
-        
         function formatearTitulo(nombreArchivo) {
             let sinExtension = nombreArchivo.substring(0, nombreArchivo.lastIndexOf('.')) || nombreArchivo;
             let limpio = sinExtension.replace(/[-_]/g, ' ');
@@ -127,9 +123,24 @@
             const contenedor = document.getElementById('vidriera-container');
             
             try {
-                let apiUrl = `https://api.github.com/repos/misterkong69-del/misterkong69-del.github.io/contents/`;
-                if (window.location.hostname.includes('github.io') && repoName && repoName !== '') {
-                    apiUrl = `https://api.github.com/repos/${userOrOrg}/${repoName}/contents/`;
+                let apiUrl = "";
+                const hostParts = window.location.hostname.split('.');
+                
+                // Detectar si estamos en GitHub Pages (usuario.github.io/repositorio)
+                if (window.location.hostname.includes('github.io')) {
+                    const userOrOrg = hostParts[0];
+                    const pathArray = window.location.pathname.split('/').filter(Boolean);
+                    const repoName = pathArray.length > 0 ? pathArray[0] : '';
+                    
+                    if (repoName) {
+                        apiUrl = `https://api.github.com/repos/${userOrOrg}/${repoName}/contents/`;
+                    } else {
+                        // Caso de repositorio principal (usuario.github.io sin subdirectorio)
+                        apiUrl = `https://api.github.com/repos/${userOrOrg}/${userOrOrg}.github.io/contents/`;
+                    }
+                } else {
+                    // Modo local o pruebas (podes cambiar esto si testeas localmente con otro repo de backup)
+                    apiUrl = `https://api.github.com/repos/tresdepto24-dev/vidrierasello/contents/`;
                 }
 
                 apiUrl += `?t=${new Date().getTime()}`;
@@ -210,13 +221,11 @@
             const timestampCompleto = `${fStr}  ${hStr}:${mStr}:${sStr}.${msStr}`;
             const hashSello = "HASH-ID: MDW-" + Math.random().toString(36).substring(2, 10).toUpperCase() + "-1001";
 
-            const escala = canvas.width / 1200; // Factor adaptable según el tamaño real de la foto
+            const escala = canvas.width / 1200;
 
             ctx.save();
 
-            // ==========================================
             // 1. LÍNEA DE TIEMPO GIGANTE Y FLOTANTE ARRIBA
-            // ==========================================
             ctx.shadowColor = "rgba(0, 0, 0, 0.9)";
             ctx.shadowOffsetX = 4 * escala;
             ctx.shadowOffsetY = 4 * escala;
@@ -225,7 +234,6 @@
             const posXLinea = 50 * escala;
             const posYLinea = 90 * escala;
 
-            // Brillo celeste neón flotante para los números
             ctx.fillStyle = "#00ffff";
             ctx.font = `900 ${Math.round(48 * escala)}px 'Orbitron', sans-serif`;
             ctx.fillText(`${hStr}:${mStr}:${sStr}.${msStr}`, posXLinea, posYLinea);
@@ -234,18 +242,12 @@
             ctx.font = `700 ${Math.round(22 * escala)}px 'Orbitron', sans-serif`;
             ctx.fillText(`FECHA: ${fStr} — ESTAMPIYA! DE TIEMPO (POSTA 1001)`, posXLinea, posYLinea + 35 * escala);
 
-
-            // ==========================================
             // 2. HASH ID ABAJO A LA IZQUIERDA
-            // ==========================================
             ctx.fillStyle = "#00ffff";
             ctx.font = `bold ${Math.round(20 * escala)}px 'Courier New', monospace`;
             ctx.fillText(hashSello, posXLinea, canvas.height - (40 * escala));
 
-
-            // ==========================================
             // 3. SELLO REDONDO APARTE (SEMI-TRANSPARENTE)
-            // ==========================================
             const radioSello = 130 * escala;
             const centroX = canvas.width - radioSello - (60 * escala);
             const centroY = canvas.height - radioSello - (60 * escala);
@@ -253,19 +255,16 @@
             ctx.save();
             ctx.translate(centroX, centroY);
 
-            // Sombra exterior del sello
             ctx.shadowColor = "rgba(0, 255, 255, 0.6)";
             ctx.shadowBlur = 12 * escala;
             ctx.shadowOffsetX = 0;
             ctx.shadowOffsetY = 0;
 
-            // Relleno semi-transparente para que la imagen se vea por debajo
             ctx.beginPath();
             ctx.arc(0, 0, radioSello, 0, Math.PI * 2);
             ctx.fillStyle = "rgba(7, 12, 16, 0.45)";
             ctx.fill();
 
-            // Anillos concéntricos del sello
             ctx.strokeStyle = "#00ffff";
             ctx.lineWidth = 5 * escala;
             ctx.stroke();
@@ -275,7 +274,6 @@
             ctx.lineWidth = 1.5 * escala;
             ctx.stroke();
 
-            // Texto circular superior (VentaniYA Soluciones)
             ctx.fillStyle = "#00ffff";
             ctx.font = `bold ${Math.round(13 * escala)}px 'Courier New', monospace`;
             ctx.textAlign = "center";
@@ -293,7 +291,6 @@
                 ctx.restore();
             }
 
-            // Textos centrales dentro del sello circular
             ctx.fillStyle = "#ffffff";
             ctx.font = `bold ${Math.round(11 * escala)}px 'Orbitron', sans-serif`;
             ctx.fillText("CERTIFICADO", 0, -15 * escala);
@@ -309,7 +306,6 @@
             ctx.restore();
             ctx.restore();
 
-            // Descarga de la imagen final procesada
             const enlace = document.createElement('a');
             enlace.download = `ESTAMPIYA_TIEMPO_${ahora.getTime()}.jpg`;
             enlace.href = canvas.toDataURL('image/jpeg', 0.98);
