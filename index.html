@@ -101,12 +101,12 @@
     <header>
         <div class="tag">POSTA DEL MILISEGUNDO — MDW 1001</div>
         <h1>VIDRIERA DE ESTAMPIYA! DE TIEMPO</h1>
-        <p style="font-size: 0.85rem; color: #67e8f9; margin-top: 5px;">Explorá el archivo visual y descargá cada pieza con certificación atómica en vivo.</p>
+        <p style="font-size: 0.85rem; color: #67e8f9; margin-top: 5px;">Escaneando repositorio completo...</p>
     </header>
 
     <main id="vidriera-container" class="vidriera-grid">
         <div style="grid-column: 1 / -1; text-align: center; color: #00ffff; padding: 40px;">
-            Buscando hasta 100 piezas en el repositorio...
+            Buscando todas las imágenes del repo...
         </div>
     </main>
 
@@ -129,14 +129,15 @@
                 let userOrOrg = hostname.split('.')[0];
                 let repoName = pathArray.length > 0 ? pathArray[0] : hostname;
 
-                // Configurado para traer hasta 100 archivos de una
-                let apiUrl = `https://api.github.com/repos/${userOrOrg}/${repoName}/contents/?per_page=100&t=${new Date().getTime()}`;
+                // Forzamos per_page=100 y agregamos un parámetro de tiempo para evitar caché vieja del navegador
+                let apiUrl = `https://api.github.com/repos/${userOrOrg}/${repoName}/contents/?per_page=100&_t=${new Date().getTime()}`;
 
                 const respuesta = await fetch(apiUrl);
                 if (!respuesta.ok) throw new Error("No se pudo conectar con la API del repositorio.");
                 
                 const archivos = await respuesta.json();
                 
+                // Filtramos solo archivos de imagen reales
                 const imagenes = archivos.filter(item => {
                     if (item.type !== 'file') return false;
                     const ext = item.name.split('.').pop().toLowerCase();
@@ -144,7 +145,7 @@
                 });
 
                 if (imagenes.length === 0) {
-                    contenedor.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: #ff5555; padding: 40px;">⚠️ No se encontraron imágenes en la raíz de este repositorio.</div>';
+                    contenedor.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: #ff5555; padding: 40px;">⚠️ No se encontraron imágenes en este repositorio.</div>';
                     return;
                 }
 
@@ -209,7 +210,6 @@
 
             ctx.save();
 
-            // 1. LÍNEA DE TIEMPO GIGANTE Y FLOTANTE ARRIBA
             ctx.shadowColor = "rgba(0, 0, 0, 0.9)";
             ctx.shadowOffsetX = 4 * escala;
             ctx.shadowOffsetY = 4 * escala;
@@ -226,12 +226,10 @@
             ctx.font = `700 ${Math.round(22 * escala)}px 'Orbitron', sans-serif`;
             ctx.fillText(`FECHA: ${fStr} — ESTAMPIYA! DE TIEMPO (POSTA 1001)`, posXLinea, posYLinea + 35 * escala);
 
-            // 2. HASH ID ABAJO A LA IZQUIERDA
             ctx.fillStyle = "#00ffff";
             ctx.font = `bold ${Math.round(20 * escala)}px 'Courier New', monospace`;
             ctx.fillText(hashSello, posXLinea, canvas.height - (40 * escala));
 
-            // 3. SELLO REDONDO APARTE (SEMI-TRANSPARENTE)
             const radioSello = 130 * escala;
             const centroX = canvas.width - radioSello - (60 * escala);
             const centroY = canvas.height - radioSello - (60 * escala);
